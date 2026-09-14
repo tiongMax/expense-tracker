@@ -1,26 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f7f4;
+  --foreground: #101828;
+  --navy: #0d1f31;
+  --emerald: #168a60;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
+
+button, a, input, select { transition: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgb(22 138 96 / .22); outline-offset: 2px; }
+::selection { background: rgb(22 138 96 / .18); }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-rise { animation: rise .4s ease both; }
+.card-surface { background: white; border: 1px solid #e5e9e6; border-radius: 18px; box-shadow: 0 1px 2px rgb(16 24 40 / .03); }
+.page-title { color: #101828; font-size: clamp(1.65rem, 3vw, 2.25rem); font-weight: 750; letter-spacing: -.035em; line-height: 1.1; }
+.page-kicker { color: #667085; font-size: .925rem; margin-top: .55rem; }
