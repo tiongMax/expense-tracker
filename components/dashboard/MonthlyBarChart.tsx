@@ -37,15 +37,15 @@ export default function MonthlyBarChart({ expenses }: Props) {
   }));
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-      <h2 className="text-base font-semibold text-gray-800 mb-4">Monthly Spending (Last 6 Months)</h2>
-      <ResponsiveContainer width="100%" height={240}>
+    <div className="card-surface p-5 sm:p-6">
+      <div className="mb-5"><h2 className="font-bold text-slate-900">Spending trend</h2><p className="mt-1 text-xs text-slate-500">Your last six months</p></div>
+      <ResponsiveContainer width="100%" height={280}>
         <BarChart data={data} margin={{ top: 4, right: 8, left: 8, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-          <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-          <YAxis tickFormatter={(v: number) => `$${v}`} tick={{ fontSize: 12 }} />
-          <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-          <Bar dataKey="total" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eef1ef" />
+          <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#98a2b3' }} dy={8} />
+          <YAxis axisLine={false} tickLine={false} width={52} tickFormatter={(v: number) => `$${v}`} tick={{ fontSize: 11, fill: '#98a2b3' }} />
+          <Tooltip cursor={{ fill: '#f6f8f7' }} contentStyle={{ borderRadius: 12, border: '1px solid #e5e9e6', boxShadow: '0 8px 24px rgba(16,24,40,.08)' }} formatter={(value) => formatCurrency(Number(value))} />
+          <Bar dataKey="total" fill="#168a60" radius={[7, 7, 2, 2]} maxBarSize={48} />
         </BarChart>
       </ResponsiveContainer>
     </div>

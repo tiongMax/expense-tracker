@@ -21,24 +21,25 @@ export default function CategoryPieChart({ expenses }: Props) {
 
   if (data.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex items-center justify-center h-72 text-gray-400 text-sm">
-        No expenses this month
+      <div className="card-surface flex min-h-[374px] flex-col p-6">
+        <div><h2 className="font-bold text-slate-900">By category</h2><p className="mt-1 text-xs text-slate-500">This month&apos;s breakdown</p></div>
+        <div className="flex flex-1 items-center justify-center text-sm text-slate-400">No expenses this month</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-      <h2 className="text-base font-semibold text-gray-800 mb-4">Spending by Category</h2>
-      <ResponsiveContainer width="100%" height={240}>
+    <div className="card-surface p-5 sm:p-6">
+      <div className="mb-3"><h2 className="font-bold text-slate-900">By category</h2><p className="mt-1 text-xs text-slate-500">This month&apos;s breakdown</p></div>
+      <ResponsiveContainer width="100%" height={300}>
         <PieChart>
-          <Pie data={data} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90} paddingAngle={3}>
+          <Pie data={data} dataKey="value" nameKey="name" innerRadius={64} outerRadius={96} paddingAngle={3} stroke="none">
             {data.map(entry => (
               <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name as keyof typeof CATEGORY_COLORS] ?? '#6b7280'} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-          <Legend />
+          <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #e5e9e6', boxShadow: '0 8px 24px rgba(16,24,40,.08)' }} formatter={(value) => formatCurrency(Number(value))} />
+          <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: '#667085' }} />
         </PieChart>
       </ResponsiveContainer>
     </div>

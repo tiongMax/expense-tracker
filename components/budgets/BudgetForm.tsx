@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Category } from '@/types';
 import { CATEGORIES } from '@/lib/constants';
+import Icon from '@/components/ui/Icon';
 
 interface Props {
   onSave: (category: Category, monthly_limit: number) => Promise<void>;
@@ -33,15 +34,15 @@ export default function BudgetForm({ onSave }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mb-6">
-      <h2 className="text-base font-semibold text-gray-800 mb-4">Set Monthly Budget</h2>
-      <form onSubmit={handleSubmit} className="flex flex-wrap gap-3 items-end">
+    <div className="card-surface mb-7 overflow-hidden">
+      <div className="border-b border-slate-100 px-5 py-4 sm:px-6"><h2 className="font-bold text-slate-900">Set a monthly budget</h2><p className="mt-1 text-xs text-slate-500">Choose a category and give it a comfortable limit.</p></div>
+      <form onSubmit={handleSubmit} className="grid gap-4 p-5 sm:grid-cols-[1fr_1fr_auto] sm:items-end sm:p-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Category</label>
           <select
             value={category}
             onChange={e => setCategory(e.target.value as Category)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-800 shadow-sm"
           >
             {CATEGORIES.map(c => (
               <option key={c} value={c}>{c}</option>
@@ -49,26 +50,26 @@ export default function BudgetForm({ onSave }: Props) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Limit ($)</label>
+          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Monthly limit ($)</label>
           <input
             type="number"
             step="0.01"
             min="0.01"
             value={limit}
             onChange={e => setLimit(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-800 shadow-sm"
             placeholder="0.00"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#0d1f31] px-5 text-sm font-semibold text-white hover:bg-[#17344f] disabled:opacity-50"
         >
-          {loading ? 'Saving...' : 'Save Budget'}
+          <Icon name="plus" className="size-4" />{loading ? 'Saving...' : 'Save budget'}
         </button>
       </form>
-      {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+      {error && <p className="px-6 pb-5 text-sm text-rose-600">{error}</p>}
     </div>
   );
 }
