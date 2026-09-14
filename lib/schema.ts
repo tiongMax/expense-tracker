@@ -1,0 +1,18 @@
+import { pgTable, uuid, numeric, text, date, timestamp } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+
+export const expenses = pgTable('expenses', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+  category: text('category').notNull(),
+  description: text('description'),
+  date: date('date').notNull().default(sql`current_date`),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const budgets = pgTable('budgets', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  category: text('category').notNull().unique(),
+  monthly_limit: numeric('monthly_limit', { precision: 10, scale: 2 }).notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
