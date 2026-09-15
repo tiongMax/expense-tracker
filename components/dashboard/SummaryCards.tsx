@@ -1,12 +1,13 @@
-import { Expense } from '@/types';
+import { Expense, Currency } from '@/types';
 import { formatCurrency, isCurrentMonth } from '@/lib/utils';
 import Icon, { IconName } from '@/components/ui/Icon';
 
 interface Props {
   expenses: Expense[];
+  currency: Currency;
 }
 
-export default function SummaryCards({ expenses }: Props) {
+export default function SummaryCards({ expenses, currency }: Props) {
   const thisMonth = expenses.filter(e => isCurrentMonth(e.date));
   const total = thisMonth.reduce((sum, e) => sum + e.amount, 0);
   const count = thisMonth.length;
@@ -20,10 +21,10 @@ export default function SummaryCards({ expenses }: Props) {
   const avgPerDay = count > 0 ? total / new Date().getDate() : 0;
 
   const cards = [
-    { label: 'Total spent', value: formatCurrency(total), note: 'this month', icon: 'wallet' as IconName, tone: 'emerald' },
+    { label: 'Total spent', value: formatCurrency(total, currency), note: `this month · ${currency}`, icon: 'wallet' as IconName, tone: 'emerald' },
     { label: 'Transactions', value: count.toString(), note: count === 1 ? 'expense logged' : 'expenses logged', icon: 'receipt' as IconName, tone: 'blue' },
-    { label: 'Top category', value: topCategory ? topCategory[0] : '—', note: topCategory ? formatCurrency(topCategory[1]) : 'No spend yet', icon: 'target' as IconName, tone: 'amber' },
-    { label: 'Daily average', value: formatCurrency(avgPerDay), note: 'for this month', icon: 'trend' as IconName, tone: 'coral' },
+    { label: 'Top category', value: topCategory ? topCategory[0] : '—', note: topCategory ? formatCurrency(topCategory[1], currency) : 'No spend yet', icon: 'target' as IconName, tone: 'amber' },
+    { label: 'Daily average', value: formatCurrency(avgPerDay, currency), note: 'for this month', icon: 'trend' as IconName, tone: 'coral' },
   ];
 
   const tones: Record<string, string> = { emerald: 'bg-emerald-50 text-emerald-700', blue: 'bg-blue-50 text-blue-700', amber: 'bg-amber-50 text-amber-700', coral: 'bg-rose-50 text-rose-700' };

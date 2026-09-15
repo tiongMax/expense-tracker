@@ -1,17 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Category } from '@/types';
-import { CATEGORIES } from '@/lib/constants';
+import { Category, Currency } from '@/types';
+import { CATEGORIES, CURRENCIES, DEFAULT_CURRENCY } from '@/lib/constants';
 import Icon from '@/components/ui/Icon';
 
 interface Props {
-  onSave: (category: Category, monthly_limit: number) => Promise<void>;
+  onSave: (category: Category, monthly_limit: number, currency: Currency) => Promise<void>;
 }
 
 export default function BudgetForm({ onSave }: Props) {
   const [category, setCategory] = useState<Category>('Food');
   const [limit, setLimit] = useState('');
+  const [currency, setCurrency] = useState<Currency>(DEFAULT_CURRENCY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,7 +25,7 @@ export default function BudgetForm({ onSave }: Props) {
     }
     setLoading(true);
     try {
-      await onSave(category, Number(limit));
+      await onSave(category, Number(limit), currency);
       setLimit('');
     } catch {
       setError('Failed to save budget.');
@@ -36,7 +37,7 @@ export default function BudgetForm({ onSave }: Props) {
   return (
     <div className="card-surface mb-7 overflow-hidden">
       <div className="border-b border-slate-100 px-5 py-4 sm:px-6"><h2 className="font-bold text-slate-900">Set a monthly budget</h2><p className="mt-1 text-xs text-slate-500">Choose a category and give it a comfortable limit.</p></div>
-      <form onSubmit={handleSubmit} className="grid gap-4 p-5 sm:grid-cols-[1fr_1fr_auto] sm:items-end sm:p-6">
+      <form onSubmit={handleSubmit} className="grid gap-4 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-[1fr_1fr_1.2fr_auto] lg:items-end">
         <div>
           <label className="mb-1.5 block text-xs font-semibold text-slate-600">Category</label>
           <select
@@ -50,7 +51,13 @@ export default function BudgetForm({ onSave }: Props) {
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Monthly limit ($)</label>
+          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Currency</label>
+          <select value={currency} onChange={event => setCurrency(event.target.value as Currency)} className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-800 shadow-sm">
+            {CURRENCIES.map(option => <option key={option.code} value={option.code}>{option.label}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold text-slate-600">Monthly limit</label>
           <input
             type="number"
             step="0.01"

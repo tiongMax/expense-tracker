@@ -2,6 +2,8 @@
 
 A private, single-user expense tracker built with Next.js, PostgreSQL, Drizzle ORM, and Recharts. Everything runs locally; no cloud database or account is required.
 
+Expenses and budgets support MYR, USD, SGD, EUR, GBP, AUD, and JPY. Currency totals stay separate and are never combined using hidden exchange rates.
+
 ## Requirements
 
 - Node.js 20 or newer

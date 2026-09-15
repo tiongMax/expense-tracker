@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Expense, Budget, BudgetStatus } from '@/types';
+import { Expense, Budget, BudgetStatus, Currency } from '@/types';
 import { isCurrentMonth } from '@/lib/utils';
 import SummaryCards from '@/components/dashboard/SummaryCards';
 import CategoryPieChart from '@/components/dashboard/CategoryPieChart';
@@ -9,12 +9,14 @@ import MonthlyBarChart from '@/components/dashboard/MonthlyBarChart';
 import BudgetProgressCard from '@/components/budgets/BudgetProgressCard';
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon';
+import { CURRENCIES, DEFAULT_CURRENCY } from '@/lib/constants';
 
 export default function DashboardPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currency, setCurrency] = useState<Currency>(DEFAULT_CURRENCY);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -29,8 +31,20 @@ export default function DashboardPage() {
     loadDashboard();
   }, []);
 
-  const budgetStatuses: BudgetStatus[] = budgets.map(b => {
-    const spent = expenses
+  useEffect(() => {
+    const savedCurrency = window.localStorage.getItem('pennywise-currency');
+    if (CURRENCIES.some(option => option.code === savedCurrency)) setCurrency(savedCurrency as Currency);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem('pennywise-currency', currency);
+  }, [currency]);
+
+  const currencyExpenses = expenses.filter(expense => expense.currency === currency);
+  const currencyBudgets = budgets.filter(budget => budget.currency === currency);
+
+  const budgetStatuses: BudgetStatus[] = currencyBudgets.map(b => {
+    const spent = currencyExpenses
       .filter(e => e.category === b.category && isCurrentMonth(e.date))
       .reduce((sum, e) => sum + e.amount, 0);
     const percentage = b.monthly_limit > 0 ? (spent / b.monthly_limit) * 100 : 0;
@@ -63,17 +77,23 @@ export default function DashboardPage() {
           <h1 className="page-title">Your money, at a glance.</h1>
           <p className="page-kicker">Keep an eye on your spending without the noise.</p>
         </div>
-        <Link href="/expenses/new" className="inline-flex w-fit items-center gap-2 rounded-xl bg-[#0d1f31] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5 hover:bg-[#17344f]">
-          <Icon name="plus" className="size-4" /> Add expense
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="sr-only" htmlFor="dashboard-currency">Dashboard currency</label>
+          <select id="dashboard-currency" value={currency} onChange={event => setCurrency(event.target.value as Currency)} className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm">
+            {CURRENCIES.map(option => <option key={option.code} value={option.code}>{option.code}</option>)}
+          </select>
+          <Link href="/expenses/new" className="inline-flex w-fit items-center gap-2 rounded-xl bg-[#0d1f31] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5 hover:bg-[#17344f]">
+            <Icon name="plus" className="size-4" /> Add expense
+          </Link>
+        </div>
       </div>
-      <SummaryCards expenses={expenses} />
+      <SummaryCards expenses={currencyExpenses} currency={currency} />
 
       {error && <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">{error}</div>}
 
       <div className="mb-8 grid grid-cols-1 gap-5 xl:grid-cols-[1.35fr_.85fr]">
-        <MonthlyBarChart expenses={expenses} />
-        <CategoryPieChart expenses={expenses} />
+        <MonthlyBarChart expenses={currencyExpenses} currency={currency} />
+        <CategoryPieChart expenses={currencyExpenses} currency={currency} />
       </div>
 
       <div className="card-surface overflow-hidden">

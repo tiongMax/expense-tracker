@@ -1,11 +1,12 @@
 'use client';
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { Expense } from '@/types';
+import { Expense, Currency } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 
 interface Props {
   expenses: Expense[];
+  currency: Currency;
 }
 
 function getLast6Months(): string[] {
@@ -18,7 +19,7 @@ function getLast6Months(): string[] {
   return months;
 }
 
-export default function MonthlyBarChart({ expenses }: Props) {
+export default function MonthlyBarChart({ expenses, currency }: Props) {
   const months = getLast6Months();
 
   const totals = months.reduce<Record<string, number>>((acc, m) => {
@@ -43,8 +44,8 @@ export default function MonthlyBarChart({ expenses }: Props) {
         <BarChart data={data} margin={{ top: 4, right: 8, left: 8, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eef1ef" />
           <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#98a2b3' }} dy={8} />
-          <YAxis axisLine={false} tickLine={false} width={52} tickFormatter={(v: number) => `$${v}`} tick={{ fontSize: 11, fill: '#98a2b3' }} />
-          <Tooltip cursor={{ fill: '#f6f8f7' }} contentStyle={{ borderRadius: 12, border: '1px solid #e5e9e6', boxShadow: '0 8px 24px rgba(16,24,40,.08)' }} formatter={(value) => formatCurrency(Number(value))} />
+          <YAxis axisLine={false} tickLine={false} width={62} tickFormatter={(v: number) => formatCurrency(v, currency)} tick={{ fontSize: 11, fill: '#98a2b3' }} />
+          <Tooltip cursor={{ fill: '#f6f8f7' }} contentStyle={{ borderRadius: 12, border: '1px solid #e5e9e6', boxShadow: '0 8px 24px rgba(16,24,40,.08)' }} formatter={(value) => formatCurrency(Number(value), currency)} />
           <Bar dataKey="total" fill="#168a60" radius={[7, 7, 2, 2]} maxBarSize={48} />
         </BarChart>
       </ResponsiveContainer>

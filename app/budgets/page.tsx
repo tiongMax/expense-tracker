@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Budget, BudgetStatus, Expense, Category } from '@/types';
+import { Budget, BudgetStatus, Expense, Category, Currency } from '@/types';
 import { isCurrentMonth } from '@/lib/utils';
 import BudgetForm from '@/components/budgets/BudgetForm';
 import BudgetProgressCard from '@/components/budgets/BudgetProgressCard';
@@ -26,17 +26,17 @@ export default function BudgetsPage() {
     loadBudgets();
   }, []);
 
-  async function handleSaveBudget(category: Category, monthly_limit: number) {
+  async function handleSaveBudget(category: Category, monthly_limit: number, currency: Currency) {
     const res = await fetch('/api/budgets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category, monthly_limit }),
+      body: JSON.stringify({ category, monthly_limit, currency }),
     });
     const saved = await res.json();
     if (!res.ok) throw new Error(saved.error || 'Failed to save budget');
     setBudgets(prev => {
-      const exists = prev.find(b => b.category === category);
-      if (exists) return prev.map(b => b.category === category ? saved : b);
+      const exists = prev.find(b => b.category === category && b.currency === currency);
+      if (exists) return prev.map(b => b.category === category && b.currency === currency ? saved : b);
       return [...prev, saved];
     });
   }
@@ -49,7 +49,7 @@ export default function BudgetsPage() {
 
   const budgetStatuses: BudgetStatus[] = budgets.map(b => {
     const spent = expenses
-      .filter(e => e.category === b.category && isCurrentMonth(e.date))
+      .filter(e => e.category === b.category && e.currency === b.currency && isCurrentMonth(e.date))
       .reduce((sum, e) => sum + e.amount, 0);
     const percentage = b.monthly_limit > 0 ? (spent / b.monthly_limit) * 100 : 0;
     return { ...b, spent, percentage, isWarning: percentage >= 80, isOver: percentage >= 100 };

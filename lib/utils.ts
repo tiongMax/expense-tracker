@@ -1,7 +1,9 @@
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
+import type { Currency } from '@/types';
+
+export function formatCurrency(amount: number, currency: Currency = 'MYR'): string {
+  return new Intl.NumberFormat('en-MY', {
     style: 'currency',
-    currency: 'USD',
+    currency,
   }).format(amount);
 }
 

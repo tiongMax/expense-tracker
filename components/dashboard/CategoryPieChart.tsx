@@ -1,15 +1,16 @@
 'use client';
 
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Expense } from '@/types';
+import { Expense, Currency } from '@/types';
 import { CATEGORY_COLORS } from '@/lib/constants';
 import { formatCurrency, isCurrentMonth } from '@/lib/utils';
 
 interface Props {
   expenses: Expense[];
+  currency: Currency;
 }
 
-export default function CategoryPieChart({ expenses }: Props) {
+export default function CategoryPieChart({ expenses, currency }: Props) {
   const thisMonth = expenses.filter(e => isCurrentMonth(e.date));
 
   const data = Object.entries(
@@ -38,7 +39,7 @@ export default function CategoryPieChart({ expenses }: Props) {
               <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name as keyof typeof CATEGORY_COLORS] ?? '#6b7280'} />
             ))}
           </Pie>
-          <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #e5e9e6', boxShadow: '0 8px 24px rgba(16,24,40,.08)' }} formatter={(value) => formatCurrency(Number(value))} />
+          <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #e5e9e6', boxShadow: '0 8px 24px rgba(16,24,40,.08)' }} formatter={(value) => formatCurrency(Number(value), currency)} />
           <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: '#667085' }} />
         </PieChart>
       </ResponsiveContainer>

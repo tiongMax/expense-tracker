@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function BudgetProgressCard({ status, onDelete, compact = false }: Props) {
-  const { category, monthly_limit, spent, percentage, isWarning, isOver } = status;
+  const { category, monthly_limit, currency, spent, percentage, isWarning, isOver } = status;
 
   const barColor = isOver
     ? 'bg-rose-500'
@@ -28,7 +28,7 @@ export default function BudgetProgressCard({ status, onDelete, compact = false }
             className="w-3 h-3 rounded-full flex-shrink-0"
             style={{ backgroundColor: CATEGORY_COLORS[category] ?? '#6b7280' }}
           />
-          <span className="font-semibold text-slate-900">{category}</span>
+          <span className="font-semibold text-slate-900">{category}</span><span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">{currency}</span>
         </div>
         <div className="flex items-center gap-2">
           {isOver && (
@@ -52,8 +52,8 @@ export default function BudgetProgressCard({ status, onDelete, compact = false }
       </div>
 
       <div className="mb-2 flex justify-between text-sm">
-        <span className="font-semibold text-slate-800">{formatCurrency(spent)} <span className="font-normal text-slate-400">spent</span></span>
-        <span className="text-slate-500">{formatCurrency(monthly_limit)}</span>
+        <span className="font-semibold text-slate-800">{formatCurrency(spent, currency)} <span className="font-normal text-slate-400">spent</span></span>
+        <span className="text-slate-500">{formatCurrency(monthly_limit, currency)}</span>
       </div>
 
       <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
@@ -63,7 +63,7 @@ export default function BudgetProgressCard({ status, onDelete, compact = false }
         />
       </div>
 
-      <div className="mt-2 flex justify-between text-xs text-slate-400"><span>{formatCurrency(Math.max(monthly_limit - spent, 0))} left</span><span className="font-semibold text-slate-500">{percentage.toFixed(0)}% used</span></div>
+      <div className="mt-2 flex justify-between text-xs text-slate-400"><span>{formatCurrency(Math.max(monthly_limit - spent, 0), currency)} left</span><span className="font-semibold text-slate-500">{percentage.toFixed(0)}% used</span></div>
     </div>
   );
 }

@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Expense, Category } from '@/types';
-import { CATEGORIES } from '@/lib/constants';
+import { Expense, Category, Currency } from '@/types';
+import { CATEGORIES, CURRENCIES, DEFAULT_CURRENCY } from '@/lib/constants';
 import Icon from '@/components/ui/Icon';
 
 interface Props { initialValues?: Expense; }
@@ -12,6 +12,7 @@ interface Props { initialValues?: Expense; }
 export default function ExpenseForm({ initialValues }: Props) {
   const router = useRouter();
   const [amount, setAmount] = useState(initialValues?.amount?.toString() ?? '');
+  const [currency, setCurrency] = useState<Currency>(initialValues?.currency ?? DEFAULT_CURRENCY);
   const [category, setCategory] = useState<Category>(initialValues?.category ?? 'Food');
   const [description, setDescription] = useState(initialValues?.description ?? '');
   const [date, setDate] = useState(initialValues?.date ?? new Date().toISOString().slice(0, 10));
@@ -21,9 +22,13 @@ export default function ExpenseForm({ initialValues }: Props) {
   useEffect(() => {
     if (initialValues) {
       setAmount(initialValues.amount.toString());
+      setCurrency(initialValues.currency);
       setCategory(initialValues.category);
       setDescription(initialValues.description ?? '');
       setDate(initialValues.date);
+    } else {
+      const savedCurrency = window.localStorage.getItem('pennywise-currency');
+      if (CURRENCIES.some(option => option.code === savedCurrency)) setCurrency(savedCurrency as Currency);
     }
   }, [initialValues]);
 
@@ -39,7 +44,7 @@ export default function ExpenseForm({ initialValues }: Props) {
       const response = await fetch(initialValues ? `/api/expenses/${initialValues.id}` : '/api/expenses', {
         method: initialValues ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: Number(amount), category, description, date }),
+        body: JSON.stringify({ amount: Number(amount), currency, category, description, date }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Unable to save expense');
@@ -57,7 +62,7 @@ export default function ExpenseForm({ initialValues }: Props) {
       <div className="grid lg:grid-cols-[minmax(0,1fr)_280px]">
         <form onSubmit={handleSubmit} className="p-5 sm:p-7 lg:p-8">
           <div className="grid gap-5 sm:grid-cols-2">
-          <div className="sm:col-span-2">
+          <div>
             <label htmlFor="amount" className="mb-2 block text-sm font-semibold text-slate-700">Amount</label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-semibold text-slate-400">$</span>
@@ -74,6 +79,18 @@ export default function ExpenseForm({ initialValues }: Props) {
               required
             />
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="currency" className="mb-2 block text-sm font-semibold text-slate-700">Currency</label>
+            <select
+              id="currency"
+              value={currency}
+              onChange={event => setCurrency(event.target.value as Currency)}
+              className="h-14 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 focus:border-emerald-500"
+            >
+              {CURRENCIES.map(option => <option key={option.code} value={option.code}>{option.label}</option>)}
+            </select>
           </div>
 
           <div>
@@ -140,7 +157,7 @@ export default function ExpenseForm({ initialValues }: Props) {
           <p className="mt-2 text-sm leading-6 text-slate-500">Each expense updates your monthly total, category breakdown, and budget progress automatically.</p>
           <div className="mt-6 space-y-3 border-t border-slate-200 pt-5 text-xs text-slate-500">
             <p className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-emerald-500" />Amounts are stored to two decimal places</p>
-            <p className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-emerald-500" />Your data stays in local PostgreSQL</p>
+            <p className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-emerald-500" />Currencies stay separate—no hidden conversion</p>
           </div>
         </aside>
       </div>

@@ -87,7 +87,7 @@ export default function ExpenseTable() {
                   </td>
                   <td className="px-4 py-4 text-slate-500">{expense.description ?? '—'}</td>
                   <td className="px-4 py-4 text-right font-bold text-slate-900">
-                    {formatCurrency(expense.amount)}
+                    {formatCurrency(expense.amount, expense.currency)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
@@ -117,7 +117,7 @@ export default function ExpenseTable() {
               <div key={expense.id} className="p-4">
                 <div className="flex items-start gap-3">
                   <span className="mt-0.5 grid size-10 shrink-0 place-items-center rounded-full text-white" style={{ backgroundColor: CATEGORY_COLORS[expense.category] }}><Icon name="receipt" className="size-4" /></span>
-                  <div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><div><p className="truncate font-semibold text-slate-800">{expense.description || expense.category}</p><p className="mt-1 text-xs text-slate-400">{expense.category} · {formatDate(expense.date)}</p></div><p className="shrink-0 font-bold text-slate-900">{formatCurrency(expense.amount)}</p></div>
+                  <div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><div><p className="truncate font-semibold text-slate-800">{expense.description || expense.category}</p><p className="mt-1 text-xs text-slate-400">{expense.category} · {expense.currency} · {formatDate(expense.date)}</p></div><p className="shrink-0 font-bold text-slate-900">{formatCurrency(expense.amount, expense.currency)}</p></div>
                     <div className="mt-3 flex gap-2"><Link href={`/expenses/${expense.id}/edit`} className="rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600">Edit</Link><button onClick={() => handleDelete(expense.id)} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-rose-600">Delete</button></div>
                   </div>
                 </div>
