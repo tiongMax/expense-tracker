@@ -63,7 +63,7 @@ export default function DashboardPage() {
           <h1 className="page-title">Your money, at a glance.</h1>
           <p className="page-kicker">Keep an eye on your spending without the noise.</p>
         </div>
-        <Link href="/expenses" className="inline-flex w-fit items-center gap-2 rounded-xl bg-[#0d1f31] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5 hover:bg-[#17344f]">
+        <Link href="/expenses/new" className="inline-flex w-fit items-center gap-2 rounded-xl bg-[#0d1f31] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5 hover:bg-[#17344f]">
           <Icon name="plus" className="size-4" /> Add expense
         </Link>
       </div>

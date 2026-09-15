@@ -12,6 +12,7 @@ const links = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href);
 
   return (
     <>
@@ -29,7 +30,7 @@ export default function Navbar() {
               key={href}
               href={href}
               className={`flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium ${
-                pathname === href
+                isActive(href)
                   ? 'bg-emerald-400/15 text-emerald-300 ring-1 ring-inset ring-emerald-300/10'
                   : 'text-slate-300 hover:bg-white/5 hover:text-white'
               }`}
@@ -56,7 +57,7 @@ export default function Navbar() {
 
       <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-xl shadow-slate-900/10 backdrop-blur lg:hidden" aria-label="Mobile navigation">
         {links.map(({ href, label, icon }) => (
-          <Link key={href} href={href} className={`flex min-w-20 flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-semibold ${pathname === href ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500'}`}>
+          <Link key={href} href={href} className={`flex min-w-20 flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-semibold ${isActive(href) ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500'}`}>
             <Icon name={icon} className="size-5" />{label}
           </Link>
         ))}

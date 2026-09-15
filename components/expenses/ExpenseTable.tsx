@@ -1,17 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { Expense } from '@/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import ExpenseForm from './ExpenseForm';
 import { CATEGORY_COLORS } from '@/lib/constants';
 import Icon from '@/components/ui/Icon';
 
 export default function ExpenseTable() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editTarget, setEditTarget] = useState<Expense | null>(null);
-  const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
 
   const fetchExpenses = useCallback(async () => {
@@ -30,30 +28,6 @@ export default function ExpenseTable() {
     setExpenses(prev => prev.filter(e => e.id !== id));
   }
 
-  async function handleSubmit(data: Parameters<React.ComponentProps<typeof ExpenseForm>['onSubmit']>[0]) {
-    if (editTarget) {
-      const res = await fetch(`/api/expenses/${editTarget.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const updated = await res.json();
-      if (!res.ok) throw new Error(updated.error || 'Failed to update expense');
-      setExpenses(prev => prev.map(e => e.id === editTarget.id ? updated : e));
-    } else {
-      const res = await fetch('/api/expenses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const created = await res.json();
-      if (!res.ok) throw new Error(created.error || 'Failed to create expense');
-      setExpenses(prev => [created, ...prev]);
-    }
-    setShowForm(false);
-    setEditTarget(null);
-  }
-
   return (
     <>
       <div className="mb-8 flex items-end justify-between gap-4">
@@ -62,12 +36,12 @@ export default function ExpenseTable() {
           <h1 className="page-title">Every expense, in one place.</h1>
           <p className="page-kicker">Review, edit, and keep your day-to-day spending tidy.</p>
         </div>
-        <button
-          onClick={() => { setEditTarget(null); setShowForm(true); }}
+        <Link
+          href="/expenses/new"
           className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#0d1f31] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5 hover:bg-[#17344f]"
         >
           <Icon name="plus" className="size-4" /> <span className="hidden sm:inline">Add expense</span><span className="sm:hidden">Add</span>
-        </button>
+        </Link>
       </div>
 
       {loading ? (
@@ -117,13 +91,13 @@ export default function ExpenseTable() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
-                      <button
-                        onClick={() => { setEditTarget(expense); setShowForm(true); }}
+                      <Link
+                        href={`/expenses/${expense.id}/edit`}
                         className="grid size-8 place-items-center rounded-lg text-slate-400 hover:bg-emerald-50 hover:text-emerald-700"
                         aria-label={`Edit ${expense.description ?? 'expense'}`}
                       >
                         <Icon name="edit" className="size-4" />
-                      </button>
+                      </Link>
                       <button
                         onClick={() => handleDelete(expense.id)}
                         className="grid size-8 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600"
@@ -144,21 +118,13 @@ export default function ExpenseTable() {
                 <div className="flex items-start gap-3">
                   <span className="mt-0.5 grid size-10 shrink-0 place-items-center rounded-full text-white" style={{ backgroundColor: CATEGORY_COLORS[expense.category] }}><Icon name="receipt" className="size-4" /></span>
                   <div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><div><p className="truncate font-semibold text-slate-800">{expense.description || expense.category}</p><p className="mt-1 text-xs text-slate-400">{expense.category} · {formatDate(expense.date)}</p></div><p className="shrink-0 font-bold text-slate-900">{formatCurrency(expense.amount)}</p></div>
-                    <div className="mt-3 flex gap-2"><button onClick={() => { setEditTarget(expense); setShowForm(true); }} className="rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600">Edit</button><button onClick={() => handleDelete(expense.id)} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-rose-600">Delete</button></div>
+                    <div className="mt-3 flex gap-2"><Link href={`/expenses/${expense.id}/edit`} className="rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600">Edit</Link><button onClick={() => handleDelete(expense.id)} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-rose-600">Delete</button></div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      )}
-
-      {showForm && (
-        <ExpenseForm
-          initialValues={editTarget ?? undefined}
-          onSubmit={handleSubmit}
-          onCancel={() => { setShowForm(false); setEditTarget(null); }}
-        />
       )}
     </>
   );

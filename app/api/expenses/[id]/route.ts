@@ -4,6 +4,19 @@ import { expenses } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { isCategory, isIsoDate, parsePositiveMoney } from '@/lib/validation';
 
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  try {
+    const [row] = await db.select().from(expenses).where(eq(expenses.id, id)).limit(1);
+    if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    return NextResponse.json({ ...row, amount: Number(row.amount) });
+  } catch (e: unknown) {
+    console.error('Failed to load expense', e);
+    return NextResponse.json({ error: 'Failed to load expense' }, { status: 500 });
+  }
+}
+
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await req.json().catch(() => null);
