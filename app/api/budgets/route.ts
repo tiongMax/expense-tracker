@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { budgets } from '@/lib/schema';
 import { asc } from 'drizzle-orm';
-import { isCategory, parsePositiveMoney } from '@/lib/validation';
+import { isCategory, isCurrency, parsePositiveMoney } from '@/lib/validation';
 
 export async function GET() {
   try {
@@ -17,19 +17,20 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: 'A valid JSON body is required' }, { status: 400 });
-  const { category, monthly_limit } = body;
+  const { category, monthly_limit, currency } = body;
   const parsedLimit = parsePositiveMoney(monthly_limit);
 
   if (!isCategory(category)) return NextResponse.json({ error: 'category is invalid' }, { status: 400 });
+  if (!isCurrency(currency)) return NextResponse.json({ error: 'currency is invalid' }, { status: 400 });
   if (parsedLimit === null) {
     return NextResponse.json({ error: 'monthly_limit must be a positive number' }, { status: 400 });
   }
 
   try {
     const [row] = await db.insert(budgets)
-      .values({ category, monthly_limit: parsedLimit.toFixed(2) })
+      .values({ category, monthly_limit: parsedLimit.toFixed(2), currency })
       .onConflictDoUpdate({
-        target: budgets.category,
+        target: [budgets.category, budgets.currency],
         set: { monthly_limit: parsedLimit.toFixed(2) },
       })
       .returning();

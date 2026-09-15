@@ -1,8 +1,12 @@
-import { CATEGORIES } from './constants';
-import type { Category } from '@/types';
+import { CATEGORIES, CURRENCIES } from './constants';
+import type { Category, Currency } from '@/types';
 
 export function isCategory(value: unknown): value is Category {
   return typeof value === 'string' && (CATEGORIES as readonly string[]).includes(value);
+}
+
+export function isCurrency(value: unknown): value is Currency {
+  return typeof value === 'string' && CURRENCIES.some(currency => currency.code === value);
 }
 
 export function parsePositiveMoney(value: unknown): number | null {
