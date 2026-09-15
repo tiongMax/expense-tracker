@@ -1,31 +1,50 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Expense, Budget, BudgetStatus } from '@/types';
+import { Expense, Budget, BudgetStatus, Currency } from '@/types';
 import { isCurrentMonth } from '@/lib/utils';
 import SummaryCards from '@/components/dashboard/SummaryCards';
 import CategoryPieChart from '@/components/dashboard/CategoryPieChart';
 import MonthlyBarChart from '@/components/dashboard/MonthlyBarChart';
 import BudgetProgressCard from '@/components/budgets/BudgetProgressCard';
+import Link from 'next/link';
+import Icon from '@/components/ui/Icon';
+import { CURRENCIES, DEFAULT_CURRENCY } from '@/lib/constants';
 
 export default function DashboardPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [currency, setCurrency] = useState<Currency>(DEFAULT_CURRENCY);
 
   useEffect(() => {
-    Promise.all([
-      fetch('/api/expenses').then(r => r.json()),
-      fetch('/api/budgets').then(r => r.json()),
-    ]).then(([exp, bud]) => {
-      setExpenses(exp);
-      setBudgets(bud);
-      setLoading(false);
-    });
+    async function loadDashboard() {
+      try {
+        const [expenseResponse, budgetResponse] = await Promise.all([fetch('/api/expenses'), fetch('/api/budgets')]);
+        if (!expenseResponse.ok || !budgetResponse.ok) throw new Error('Could not load dashboard data');
+        const [exp, bud] = await Promise.all([expenseResponse.json(), budgetResponse.json()]);
+        setExpenses(exp); setBudgets(bud);
+      } catch { setError('We could not connect to your data. Check that the database is running, then refresh.'); }
+      finally { setLoading(false); }
+    }
+    loadDashboard();
   }, []);
 
-  const budgetStatuses: BudgetStatus[] = budgets.map(b => {
-    const spent = expenses
+  useEffect(() => {
+    const savedCurrency = window.localStorage.getItem('pennywise-currency');
+    if (CURRENCIES.some(option => option.code === savedCurrency)) setCurrency(savedCurrency as Currency);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem('pennywise-currency', currency);
+  }, [currency]);
+
+  const currencyExpenses = expenses.filter(expense => expense.currency === currency);
+  const currencyBudgets = budgets.filter(budget => budget.currency === currency);
+
+  const budgetStatuses: BudgetStatus[] = currencyBudgets.map(b => {
+    const spent = currencyExpenses
       .filter(e => e.category === b.category && isCurrentMonth(e.date))
       .reduce((sum, e) => sum + e.amount, 0);
     const percentage = b.monthly_limit > 0 ? (spent / b.monthly_limit) * 100 : 0;
@@ -33,41 +52,66 @@ export default function DashboardPage() {
   });
 
   const alertBudgets = budgetStatuses.filter(b => b.isWarning);
+  const monthLabel = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date());
 
   if (loading) {
     return (
-      <div className="space-y-4 animate-pulse">
+      <div className="space-y-5 animate-pulse">
+        <div className="h-16 w-72 rounded-xl bg-slate-200" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-gray-200 rounded-xl" />)}
+          {[...Array(4)].map((_, i) => <div key={i} className="h-36 bg-slate-200 rounded-[18px]" />)}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="h-72 bg-gray-200 rounded-xl" />
-          <div className="h-72 bg-gray-200 rounded-xl" />
+          <div className="h-96 bg-slate-200 rounded-[18px]" />
+          <div className="h-96 bg-slate-200 rounded-[18px]" />
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
-      <SummaryCards expenses={expenses} />
+    <div className="animate-rise">
+      <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p className="mb-2 text-xs font-bold uppercase tracking-[.16em] text-emerald-700">{monthLabel}</p>
+          <h1 className="page-title">Your money, at a glance.</h1>
+          <p className="page-kicker">Keep an eye on your spending without the noise.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="sr-only" htmlFor="dashboard-currency">Dashboard currency</label>
+          <select id="dashboard-currency" value={currency} onChange={event => setCurrency(event.target.value as Currency)} className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm">
+            {CURRENCIES.map(option => <option key={option.code} value={option.code}>{option.code}</option>)}
+          </select>
+          <Link href="/expenses/new" className="inline-flex w-fit items-center gap-2 rounded-xl bg-[#0d1f31] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5 hover:bg-[#17344f]">
+            <Icon name="plus" className="size-4" /> Add expense
+          </Link>
+        </div>
+      </div>
+      <SummaryCards expenses={currencyExpenses} currency={currency} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <CategoryPieChart expenses={expenses} />
-        <MonthlyBarChart expenses={expenses} />
+      {error && <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">{error}</div>}
+
+      <div className="mb-8 grid grid-cols-1 gap-5 xl:grid-cols-[1.35fr_.85fr]">
+        <MonthlyBarChart expenses={currencyExpenses} currency={currency} />
+        <CategoryPieChart expenses={currencyExpenses} currency={currency} />
       </div>
 
-      {alertBudgets.length > 0 && (
-        <div>
-          <h2 className="text-base font-semibold text-gray-800 mb-3">Budget Alerts</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {alertBudgets.map(b => (
-              <BudgetProgressCard key={b.id} status={b} onDelete={() => {}} />
-            ))}
-          </div>
+      <div className="card-surface overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
+          <div><h2 className="font-bold text-slate-900">Budget watch</h2><p className="mt-0.5 text-xs text-slate-500">Categories closest to their limit</p></div>
+          <Link href="/budgets" className="flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:text-emerald-800">View all <Icon name="arrow" className="size-4" /></Link>
         </div>
-      )}
+        {alertBudgets.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2 xl:grid-cols-3 sm:p-6">
+            {alertBudgets.map(b => <BudgetProgressCard key={b.id} status={b} onDelete={() => {}} compact />)}
+          </div>
+        ) : (
+          <div className="flex items-center gap-4 px-6 py-7">
+            <span className="grid size-11 place-items-center rounded-full bg-emerald-50 text-emerald-700"><Icon name="target" className="size-5" /></span>
+            <div><p className="text-sm font-semibold text-slate-800">Everything looks healthy</p><p className="mt-0.5 text-sm text-slate-500">No budget is near its limit this month.</p></div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -8,9 +8,12 @@ export type Category =
   | 'Utilities'
   | 'Other';
 
+export type Currency = 'MYR' | 'USD' | 'SGD' | 'EUR' | 'GBP' | 'AUD' | 'JPY';
+
 export interface Expense {
   id: string;
   amount: number;
+  currency: Currency;
   category: Category;
   description: string | null;
   date: string;
@@ -21,6 +24,7 @@ export interface Budget {
   id: string;
   category: Category;
   monthly_limit: number;
+  currency: Currency;
   created_at: string;
 }
 

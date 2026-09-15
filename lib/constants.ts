@@ -1,4 +1,4 @@
-import { Category } from '@/types';
+import { Category, Currency } from '@/types';
 
 export const CATEGORIES: Category[] = [
   'Food',
@@ -10,6 +10,18 @@ export const CATEGORIES: Category[] = [
   'Utilities',
   'Other',
 ];
+
+export const CURRENCIES: { code: Currency; label: string }[] = [
+  { code: 'MYR', label: 'MYR — Malaysian Ringgit' },
+  { code: 'USD', label: 'USD — US Dollar' },
+  { code: 'SGD', label: 'SGD — Singapore Dollar' },
+  { code: 'EUR', label: 'EUR — Euro' },
+  { code: 'GBP', label: 'GBP — British Pound' },
+  { code: 'AUD', label: 'AUD — Australian Dollar' },
+  { code: 'JPY', label: 'JPY — Japanese Yen' },
+];
+
+export const DEFAULT_CURRENCY: Currency = 'MYR';
 
 export const CATEGORY_COLORS: Record<Category, string> = {
   Food: '#f97316',

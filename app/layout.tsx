@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Expense Tracker",
-  description: "Track your expenses and manage budgets",
+  title: "Pennywise — Expense Tracker",
+  description: "Clear, simple expense and budget tracking",
 };
 
 export default function RootLayout({
@@ -19,11 +13,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-gray-50">
+    <html lang="en" className="h-full antialiased">
+      <body className="min-h-full bg-[#f6f7f4]">
         <Navbar />
-        <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
+        <main className="min-h-screen px-4 pb-24 pt-7 md:px-8 md:pb-10 md:pt-9 lg:ml-64 lg:px-10 xl:px-14">
+          <div className="mx-auto w-full max-w-[1440px]">
           {children}
+          </div>
         </main>
       </body>
     </html>
